@@ -32,6 +32,7 @@ def tick():
     logger.info('Tick.')
     # logger.debug('Tick.')
 
+
 def dummy_parser(
         dummyArg: int,
         Link: str):
@@ -40,44 +41,49 @@ def dummy_parser(
     """
 
     Link = Link
-    shop_name = 'My Shop 2'
+    shop_name = 'My Shop 2 Sample'
     Shop_Name = 'Not my Shop'
-    nomenclature = pow(2, (dummyArg+4))
+    nomenclature = str(pow(2, (dummyArg+4)))+' power sample'
     Customer_Price_BYN = 3.1
     Seller_Price_BYN = False
     Customer_price_RUB = 1,
-    Seller_Price_RUB = dummyArg
+    Seller_Price_RUB = dummyArg*750
 
     pageResultDummy = pageResult(
-        Date=str(datetime.now()),
+        Date=str(datetime.now().strftime("%d/%m/%Y %H:%M:%S")),
         Link=Link,
         Shop_Name=shop_name,
         Set=nomenclature,
-        Customer_Price_BYN=Customer_Price_BYN,
-        Seller_Price_BYN=Seller_Price_BYN,
-        Customer_price_RUB='Не работает',
+        Customer_Price_BYN='-',
+        Seller_Price_BYN='-',
+        Customer_price_RUB=2637.5,
         Seller_Price_RUB='-'
     )
 
     return pageResultDummy
 
 
-def dummy_scraper(lnks):
+def dum_interval_scraper(lnks):
     """
     Simulate scraper
     """
+    logger.info(f'Dummy interval scraper started. Have {len(lnks)} links')
+    logger.debug('-'*20)
     full_result = []
-    for i in range(0, len(lnks)):
+    for i in range(len(lnks)):
         logger.info(f'Scrape link №{i+1} of {len(lnks)}')
-        full_result.append(parser(i, lnks[i]))
-        time.sleep(1)
+        start_time = time.time()
+        full_result.append(dummy_parser(i, lnks[i]))
+        time.sleep(2)
+        end_time = time.time()
+        logger.debug('-'*20 + f' DONE in {round(end_time - start_time,0)} sec')
     return full_result
 
 
 def ppage_parser(
     driver: selenium.webdriver,
     Link: str,
-                ) -> pageResult:
+) -> pageResult:
     """
     Simplest parser
     """

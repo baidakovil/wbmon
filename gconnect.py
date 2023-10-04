@@ -188,6 +188,7 @@ def post_values(sh_id,
     headRange = wks.get_named_range(name=CFG.HEADER_RANGE_NAME)
     rn, cn = headRange.start_addr
     post_position = (rn+1, cn)
+
     logger.debug('headRange address loaded, prepared to unlink')
     wks.unlink()
     for result in full_result:
@@ -205,16 +206,22 @@ def post_values(sh_id,
             parse=None)
     wks.link()
     logger.debug('Worksheed linked again')
+
     return True
 
-def dummy_post_values(full_result) -> bool:
-    logger.debug('Start posting values')
+def dummy_post_values(
+                sh_id,
+                gc,
+                sh,
+                wks,
+                full_result,
+                ) -> bool:
+    logger.debug(' START POSTING')
+    logger.info(' | '.join(CFG.DATA_HEADER))
+    start_time = time.time()
     for result in full_result:
-        wks.insert_rows(row=1,
-                        number=1,
-                        values=None,
-                        inherit=False)
-        result_list = [result._asdict()[name] for name in CFG.DATA_HEADER]
-        print(result, sep=' | ')
+        result_list = [str(result._asdict()[name]) for name in CFG.DATA_HEADER]
+        logger.info(' | '.join(result_list))
         time.sleep(1)
-    logger.debug('Start posting values')
+    end_time = time.time()
+    logger.debug(' FINISH POSTING' + f' DONE in {round(end_time - start_time,0)} sec')
