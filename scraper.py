@@ -139,7 +139,7 @@ def interval_scraper(lnks):
     for i in range(0, len(lnks)):
 
         interparse_sleep = random.randint(
-            CFG.SCRAPER_INTERPARSE_MIN, CFG.SCRAPER_INTERPARSE_MIN)
+            CFG.SCRAPER_INTERPARSE_MIN, CFG.SCRAPER_INTERPARSE_MAX)
         logger.info(f'Scrape link №{i+1} of {len(lnks)}. Sleep: {interparse_sleep} sec')
         time.sleep(interparse_sleep)
 
