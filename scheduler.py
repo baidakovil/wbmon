@@ -1,59 +1,110 @@
+import os
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+from tzlocal import get_localzone
 
-from gconnect import post_values, dummy_post_values
+from gconnect import start_gsheets, post_values, dummy_post_values
 from scraper import interval_scraper, dum_interval_scraper
+
+from dotenv import load_dotenv
+from config import Cfg
+
+BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+
+load_dotenv(os.path.join(BOT_FOLDER, '.env'))
+CFG = Cfg(test=os.getenv('TEST') == 'true')
 
 logger = logging.getLogger('A.GC')
 logger.setLevel(logging.DEBUG)
 
+def get_scheduler():
 
-def interval_job(lnks):
-    lnks, gc, sh, wks = start_gsheets()
-    post_values(
-                sh_id=sh.id,
-                gc=gc,
-                sh=sh,
-                wks=wks,
-                full_result=interval_scraper(lnks),
-                )
-    print(f'Count of Links: {len(lnks)}\nSpreadsheet Title: {sh.title}')
+    lnks, gc = start_gsheets()
 
-def get_dum_scheduler(kwargs):
     scheduler = BlockingScheduler()
     trigger = CronTrigger(
-                        hour="*",
-                        second="*/30",
-                        jitter=5,
-                        )
-    kwargs['trigger']=trigger
+        **CFG.CRON_ARGS
+    )
+
+    kwargs = {'lnks': lnks[:CFG.MAX_LINK_QUANTITY],
+              'gc': gc,
+              'trigger': trigger}
+
     scheduler.add_job(
-                    func=dummy_interval_job,
-                    trigger=trigger,
-                    kwargs=kwargs,
-                    name='My job for interval scraping',
-                    misfire_grace_time=300,
-                    coalesce=True,
-                    )
-    print("NEXT JOB RUN @ ", trigger.get_next_fire_time(None, datetime.now()))
+        func=interval_job,
+        trigger=trigger,
+        kwargs=kwargs,
+        name='My job for interval scraping',
+        misfire_grace_time=CFG.MISFIRE_TIME,
+        coalesce=True,
+    )
+    if CFG.ASAP and (calc_delay(trigger).total_seconds() > CFG.ASAPTRIGGER):
+        for job in scheduler.get_jobs():
+            job.modify(next_run_time=datetime.now() +
+                       timedelta(seconds=CFG.ASAPDELAY))
+            logger.info(
+                f'TIME OF NEXT JOB CHANGED. {CFG.ASAPDELAY} sec to run')
+
     return scheduler
 
-def dummy_interval_job(lnks,sh_id,gc,sh,wks,trigger):
+
+def interval_job(lnks, gc, trigger):
+    start_time = time.time()
+    logger.debug('='*20+' JOBSTARTED')
+
+    post_values(
+        gc=gc,
+        full_result=interval_scraper(lnks),
+    )
+    end_time = time.time()
+    logger.debug('='*20+f' JOBDONE in {round(end_time - start_time,0)} sec')
+    calc_delay(trigger)
+
+
+def get_dum_scheduler(asap, kwargs):
+
+    scheduler = BlockingScheduler()
+    trigger = CronTrigger(
+        second="*/30",
+        jitter=5,
+    )
+    kwargs['trigger'] = trigger
+    scheduler.add_job(
+        func=dummy_interval_job,
+        trigger=trigger,
+        kwargs=kwargs,
+        name='My dummy job for interval scraping',
+        misfire_grace_time=300,
+        coalesce=True,
+    )
+    if asap and (calc_delay(trigger).total_seconds() > CFG.ASAPTRIGGER):
+        for job in scheduler.get_jobs():
+            job.modify(next_run_time=datetime.now() +
+                       timedelta(seconds=CFG.ASAPDELAY))
+            logger.info(
+                f'TIME OF NEXT JOB CHANGED. {CFG.ASAPDELAY} sec to run')
+    return scheduler
+
+
+def dummy_interval_job(lnks, sh_id, gc, sh, wks, trigger):
     start_time = time.time()
     logger.debug('='*20+' JOBSTARTED')
     dummy_post_values(
-                sh_id=sh_id,
-                gc=gc,
-                sh=sh,
-                wks=wks,
-                full_result=dum_interval_scraper(lnks),
-                )
-    end_time = time.time()  
+        gc=gc,
+        full_result=dum_interval_scraper(lnks),
+    )
+    end_time = time.time()
     logger.debug('='*20+f' JOBDONE in {round(end_time - start_time,0)} sec')
-    print('\n')
-    print("NEXT JOB RUN @ ", trigger.get_next_fire_time(None, datetime.now()))
-    print('\n')
+    calc_delay(trigger)
+
+def calc_delay(trigger):
+    now = datetime.now(tz=get_localzone())
+    next_time = trigger.get_next_fire_time(None, now)
+    delay = next_time-now
+    print(
+        f"\nNEXT JOB RUN @ {next_time.strftime('%d/%m/%Y %H:%M:%S')} WAIT {delay}\n")
+    return delay

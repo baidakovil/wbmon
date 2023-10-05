@@ -1,3 +1,4 @@
+import os
 import logging
 import time
 from typing import Union, List, Tuple
@@ -6,41 +7,58 @@ from datetime import datetime
 
 import pygsheets
 
+from dotenv import load_dotenv
+from config import Cfg
+
+BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+
+load_dotenv(os.path.join(BOT_FOLDER, '.env'))
+CFG = Cfg(test=os.getenv('TEST') == 'true')
+
 logger = logging.getLogger('A.GC')
 logger.setLevel(logging.DEBUG)
 
 if __name__ == '__main__':
     pageResult = namedtuple(
         typename='pageResult',
-        field_names=DATA_HEADER,
+        field_names=CFG.DATA_HEADER,
         rename=False,
         defaults=None,
     )
 
+class Gc():
+    """
+    Class represented continuous connection to google.sheets
+    """
+    def __init__(self):
+        self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
+        self.started = time.time()
+        print('Client authorized at start')
 
-class CFG():
-    SPREADSHEET_PREFIX = 'wbmon-log-'
-    MAX_SPREADSHEETS_PERDAY = 10
-    HEADER_RANGE_NAME = 'headerRange'
-    HEADER_LEFT_CORNER = (1, 1)
-    LINKS_RANGE_NAME = 'linksRange'
-    LINKS_SPREADSHEET_NAME = 'links'
-    OAUTH_CREDENTIALS_FILE = 'client_secret.json'
-    SCRAPER_INTERPARSE_MAX = 20
-    SCRAPER_INTERPARSE_MIN = 10
-    SCRAPER_BEFOREQUIT_MAX = 20
-    SCRAPER_BEFOREQUIT_MIN = 10
-    DATA_HEADER = [
-        'Date',
-        'Link',
-        'Shop_Name',
-        'Set',
-        'Customer_Price_BYN',
-        'Seller_Price_BYN',
-        'Customer_price_RUB',
-        'Seller_Price_RUB',
-    ]
+    def open_by_name(self, spreadsheet):
+        self.sh = self.client.open(spreadsheet)
+        self.started = time.time()
+        return self.sh
 
+    def open_wks(self, spreadsheet):
+        self.wks = self.sh.sheet1
+        self.started = time.time()
+        return self.wks
+
+    def reconnect(self, soft):
+        last_connect = time.time() - self.started
+        if (soft and (last_connect > CFG.PYGSHEET_RECONNECT_TIME)) or (not soft):
+            print(f'Will reconnect. Last connection was {round(last_connect/60,1)}'\
+                    f'min ago, more than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
+            self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
+            self.sh = self.client.open_by_key(self.sh.id)
+            self.wks = self.sh.sheet1
+            self.started = time.time()
+            print('Client re-authorized, Spreadsheet and Worksheet reloaded')
+        else:
+            print(f'Wont reconnect. Last connection was {round(last_connect/60,1)}'\
+                    f'min ago, LESS than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
+            pass
 
 def create_new_sheet(gc: pygsheets.client.Client) -> str:
     """
@@ -89,6 +107,7 @@ def get_links(gc: pygsheets.client.Client) -> List[str]:
     lnkrange_values = wks_links.get_values(
         start=lnkrange.start_addr,
         end=lnkrange.end_addr)
+    wks_links.unlink()
     logger.debug('Links values downloaded')
     lnks = []
     for cell in lnkrange_values:
@@ -130,7 +149,7 @@ def start_gsheets() -> Union[Tuple[List[str],
                                    pygsheets.client.Client,
                                    pygsheets.Spreadsheet,
                                    pygsheets.Worksheet
-                                   ], None]:
+                                         ], None]:
     """
     Function to start work with googlesheets. 
     Establish connection, create new list, create header.
@@ -138,41 +157,31 @@ def start_gsheets() -> Union[Tuple[List[str],
     - tuple with links to load and spreadsheet to write if OK
     - None otherway
     """
-    gc = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
+    gc = Gc()
+    client = gc.client
     logger.info('Client authorized at start')
-    lnks = get_links(gc)
-    sh = gc.open(create_new_sheet(gc))
-    logger.debug('Spreadsheet loaded')
-    wks = sh.sheet1
-    logger.debug('Worksheet loaded')
-    if create_header(wks):
-        return (lnks, gc, sh, wks)
+
+    lnks = get_links(client)
+    logger.info(f"TEST MODE: {os.getenv('TEST') == 'true'}")
+    if CFG.CREATE_NEW_SPREADSHEET:
+        spreadsheet = create_new_sheet(client)
     else:
-        return None
+        spreadsheet = CFG.OLD_SHEET_TITLE
+        logger.info(f'Old Spreadsheet will be loaded: {CFG.OLD_SHEET_TITLE}')
+    sh = gc.open_by_name(spreadsheet)
+    # sh = gc.open(create_new_sheet(gc))
+    wks = gc.open_wks(sh)
+    # wks = sh.sheet1
+    if CFG.CREATE_NEW_SPREADSHEET:
+        create_header(wks)
+
+    return lnks, gc
 
 
-def pgAuthorize(sheet_id: str) -> Tuple[pygsheets.client.Client,
-                                        pygsheets.Spreadsheet,
-                                        pygsheets.Worksheet]:
-    """
-    Renews connection with Google Sheets.
-    Returns:
-    Client, Spreadsheet №1, Worksheet with scrobbler data
-    """
-    gc = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
-    logger.info('Client authorized again')
-    sh = gc.open_by_key(sh_id)
-    wks = sh.sheet1
-    logger.info('Spreadsheet and Worksheet loaded again')
-    return gc, sh, wks
-
-
-def post_values(sh_id,
-                gc,
-                sh,
-                wks,
-                full_result,
-                ) -> bool:
+def post_values(
+    gc,
+    full_result,
+) -> bool:
     """
     Finds actual header position and post all rows below it.
     Args:
@@ -183,20 +192,21 @@ def post_values(sh_id,
     Returns:
     - True if posted
     """
-    # gc, sh, wks = pgAuthorize(sheet_id=sheet_id)
-    logger.debug('Start posting values')
+    gc.reconnect(soft=True)
+    wks = gc.wks
+    logger.debug(' START POSTING')
+    logger.info(' | '.join(CFG.DATA_HEADER))
+    start_time = time.time()
     headRange = wks.get_named_range(name=CFG.HEADER_RANGE_NAME)
     rn, cn = headRange.start_addr
     post_position = (rn+1, cn)
-
-    logger.debug('headRange address loaded, prepared to unlink')
     wks.unlink()
     for result in full_result:
         wks.insert_rows(row=1,
                         number=1,
                         values=None,
                         inherit=False)
-        result_list = [result._asdict()[name] for name in CFG.DATA_HEADER]
+        result_list = [str(result._asdict()[name]) for name in CFG.DATA_HEADER]
         wks.update_values(
             crange=post_position,
             values=[result_list],
@@ -204,18 +214,19 @@ def post_values(sh_id,
             extend=False,
             majordim='ROWS',
             parse=None)
+        logger.info(' | '.join(result_list))
     wks.link()
-    logger.debug('Worksheed linked again')
+    end_time = time.time()
+    logger.debug(' FINISH POSTING' +
+                 f' DONE in {round(end_time - start_time,0)} sec')
 
     return True
 
+
 def dummy_post_values(
-                sh_id,
-                gc,
-                sh,
-                wks,
-                full_result,
-                ) -> bool:
+    gc,
+    full_result,
+) -> bool:
     logger.debug(' START POSTING')
     logger.info(' | '.join(CFG.DATA_HEADER))
     start_time = time.time()
@@ -224,4 +235,5 @@ def dummy_post_values(
         logger.info(' | '.join(result_list))
         time.sleep(1)
     end_time = time.time()
-    logger.debug(' FINISH POSTING' + f' DONE in {round(end_time - start_time,0)} sec')
+    logger.debug(' FINISH POSTING' +
+                 f' DONE in {round(end_time - start_time,0)} sec')

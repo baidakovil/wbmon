@@ -6,15 +6,20 @@ import logging
 from datetime import datetime
 from collections import namedtuple
 
-import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import TimeoutException
 
-from gconnect import CFG
+from dotenv import load_dotenv
+from config import Cfg
 
 BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+
+load_dotenv(os.path.join(BOT_FOLDER, '.env'))
+CFG = Cfg(test=os.getenv('TEST') == 'true')
 
 logger = logging.getLogger('A.SC')
 logger.setLevel(logging.DEBUG)
@@ -81,25 +86,30 @@ def dum_interval_scraper(lnks):
 
 
 def ppage_parser(
-    driver: selenium.webdriver,
-    Link: str,
-) -> pageResult:
+    driver,
+    Link,
+                ) -> pageResult:
     """
-    Simplest parser
+    Product Page Parser
     """
     logger.debug(f'Parser prepare to get link {Link}')
     driver.get(Link)
     logger.debug(f'Parser wait for price')
-    price = WebDriverWait(driver, 60).until(
-        EC.visibility_of_element_located(
-            (By.XPATH, "//*[@class='price-block__final-price']")
-        ))
-    logger.debug(f'Parser got price')
-    price = int(re.sub(r'[^0-9]', '', price.text))
-    nc = str(driver.find_element(
-        By.XPATH, "//*[@class='product-page__header']").text)
+    
+    try:
+        price = WebDriverWait(driver, CFG.PAGELOAD_MAXTIME).until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//*[@class='price-block__final-price']")
+            ))
+        price = int(re.sub(r'[^0-9]', '', price.text))
+        nc = str(driver.find_element(
+            By.XPATH, "//*[@class='product-page__header']").text)
+    except TimeoutException:
+        price = 'TimeoutException'
+        nc = 'TimeoutException'
+
     dt_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    logger.debug(f'Parsed. Price: {price}, Time: {dt_string}')
+
     pageResultParser = pageResult(
         Date=str(dt_string),
         Link=Link,
@@ -115,25 +125,39 @@ def ppage_parser(
 
 def interval_scraper(lnks):
     """
-    Simulate scraper
+    Scraper.
     """
     logger.info(f'Interval scraper started. Have {len(lnks)} links')
-    driver = webdriver.Chrome()
+    logger.debug('-'*20)
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    driver = webdriver.Chrome(options=options)
+
     full_result = []
     for i in range(0, len(lnks)):
-        logger.debug('='*20)
-        time.sleep(random.randint(
-            CFG.SCRAPER_INTERPARSE_MIN, CFG.SCRAPER_INTERPARSE_MIN))
-        logger.info(f'Scrape link №{i+1} of {len(lnks)}')
+
+        interparse_sleep = random.randint(
+            CFG.SCRAPER_INTERPARSE_MIN, CFG.SCRAPER_INTERPARSE_MIN)
+        logger.info(f'Scrape link №{i+1} of {len(lnks)}. Sleep: {interparse_sleep} sec')
+        time.sleep(interparse_sleep)
+
+        start_time = time.time()
         full_result.append(
             ppage_parser(
                 driver=driver,
                 Link=lnks[i])
         )
-        logger.debug('='*20)
+        end_time = time.time()
 
-    time.sleep(random.randint(
-        CFG.SCRAPER_BEFOREQUIT_MIN, CFG.SCRAPER_BEFOREQUIT_MAX))
+        logger.debug('-'*20 + f' DONE in {round(end_time - start_time,0)} sec')
+
+    beforequit_sleep = random.randint(
+        CFG.SCRAPER_BEFOREQUIT_MIN, CFG.SCRAPER_BEFOREQUIT_MAX)
+    logger.info(f'Driver will quit() after sleep: {interparse_sleep} sec')
+    time.sleep(interparse_sleep)
+
     driver.quit()
 
     return full_result

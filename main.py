@@ -2,12 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from gconnect import start_gsheets, post_values
-from scraper import tick, interval_scraper
-from scheduler import interval_job
-
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
+from scheduler import get_scheduler
 
 BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
@@ -64,39 +59,19 @@ def startLogger():
 
 
 logger = startLogger()
-logger.info(f'App started, __name__ is {__name__}')
 
 
 def main():
     """
     Function to run bot.
-
-    lnks, gc, sh, wks = start_gsheets()
-    post_values(
-                sh_id=sh.id,
-                gc=gc,
-                sh=sh,
-                wks=wks,
-                full_result=interval_scraper(lnks),
-                )
-    print(f'Count of Links: {len(lnks)}\nSpreadsheet Title: {sh.title}')
     """
-
-    scheduler = BlockingScheduler()
-    job_1 = scheduler.add_job(
-                    func=interval_job,
-                    trigger='interval',
-                    kwargs={'lnks':lnks},
-                    name='My job for interval scraping',
-                    seconds=10,
-                    )
-
-    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
-
+    scheduler = get_scheduler()
     try:
+        logger.info('Bot run.')
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         pass
+
 
 if __name__ == '__main__':
     main()
