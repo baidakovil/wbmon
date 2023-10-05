@@ -105,6 +105,6 @@ def calc_delay(trigger):
     now = datetime.now(tz=get_localzone())
     next_time = trigger.get_next_fire_time(None, now)
     delay = next_time-now
-    print(
+    logger.info(
         f"\nNEXT JOB RUN @ {next_time.strftime('%d/%m/%Y %H:%M:%S')} WAIT {delay}\n")
     return delay

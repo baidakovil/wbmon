@@ -5,5 +5,5 @@ pygsheets==2.0.6
 selenium==4.13.0
 pandas
 Requests==2.31.0
-dotenv==1.0.0
+python-dotenv==1.0.0
 

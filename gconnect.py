@@ -33,7 +33,7 @@ class Gc():
     def __init__(self):
         self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
         self.started = time.time()
-        print('Client authorized at start')
+        logger.debug('Client authorized at start')
 
     def open_by_name(self, spreadsheet):
         self.sh = self.client.open(spreadsheet)
@@ -48,15 +48,15 @@ class Gc():
     def reconnect(self, soft):
         last_connect = time.time() - self.started
         if (soft and (last_connect > CFG.PYGSHEET_RECONNECT_TIME)) or (not soft):
-            print(f'Will reconnect. Last connection was {round(last_connect/60,1)}'\
+            logger.debug(f'Will reconnect. Last connection was {round(last_connect/60,1)}'\
                     f'min ago, more than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
             self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
             self.sh = self.client.open_by_key(self.sh.id)
             self.wks = self.sh.sheet1
             self.started = time.time()
-            print('Client re-authorized, Spreadsheet and Worksheet reloaded')
+            logger.debug('Client re-authorized, Spreadsheet and Worksheet reloaded')
         else:
-            print(f'Wont reconnect. Last connection was {round(last_connect/60,1)}'\
+            logger.debug(f'Wont reconnect. Last connection was {round(last_connect/60,1)}'\
                     f'min ago, LESS than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
             pass
 

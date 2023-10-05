@@ -7,3 +7,4 @@ paper
 *.html
 *.ipynb
 data
+.env
