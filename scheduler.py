@@ -2,24 +2,22 @@ import os
 import logging
 import time
 from datetime import datetime, timedelta
+from tzlocal import get_localzone
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
-from tzlocal import get_localzone
 
+from config import Cfg
 from gconnect import start_gsheets, post_values, dummy_post_values
 from scraper import interval_scraper, dum_interval_scraper
 
-from dotenv import load_dotenv
-from config import Cfg
-
 BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+CFG = Cfg()
 
-load_dotenv(os.path.join(BOT_FOLDER, '.env'))
-CFG = Cfg(test=os.getenv('TEST') == 'true')
 
 logger = logging.getLogger('A.GC')
 logger.setLevel(logging.DEBUG)
+
 
 def get_scheduler():
 
@@ -101,10 +99,11 @@ def dummy_interval_job(lnks, sh_id, gc, sh, wks, trigger):
     logger.debug('='*20+f' JOBDONE in {round(end_time - start_time,0)} sec')
     calc_delay(trigger)
 
+
 def calc_delay(trigger):
     now = datetime.now(tz=get_localzone())
     next_time = trigger.get_next_fire_time(None, now)
     delay = next_time-now
     logger.info(
-        f"\nNEXT JOB RUN @ {next_time.strftime('%d/%m/%Y %H:%M:%S')} WAIT {delay}\n")
+        f"\nNEXT JOB RUN @ {next_time.strftime('%d/%m/%Y %H:%M:%S')} WAIT {delay} sec\n")
     return delay

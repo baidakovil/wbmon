@@ -7,31 +7,24 @@ from datetime import datetime
 
 import pygsheets
 
-from dotenv import load_dotenv
 from config import Cfg
+from wbparser import PageResult
 
 BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
-
-load_dotenv(os.path.join(BOT_FOLDER, '.env'))
-CFG = Cfg(test=os.getenv('TEST') == 'true')
+CFG = Cfg()
 
 logger = logging.getLogger('A.GC')
 logger.setLevel(logging.DEBUG)
 
-if __name__ == '__main__':
-    pageResult = namedtuple(
-        typename='pageResult',
-        field_names=CFG.DATA_HEADER,
-        rename=False,
-        defaults=None,
-    )
 
 class Gc():
     """
     Class represented continuous connection to google.sheets
     """
+
     def __init__(self):
-        self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
+        self.client = pygsheets.authorize(
+            client_secret=CFG.OAUTH_CREDENTIALS_FILE)
         self.started = time.time()
         logger.debug('Client authorized at start')
 
@@ -48,17 +41,20 @@ class Gc():
     def reconnect(self, soft):
         last_connect = time.time() - self.started
         if (soft and (last_connect > CFG.PYGSHEET_RECONNECT_TIME)) or (not soft):
-            logger.debug(f'Will reconnect. Last connection was {round(last_connect/60,1)}'\
-                    f'min ago, more than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
-            self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
+            logger.debug(f'Will reconnect. Last connection was {round(last_connect/60,1)}'
+                         f'min ago, more than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
+            self.client = pygsheets.authorize(
+                client_secret=CFG.OAUTH_CREDENTIALS_FILE)
             self.sh = self.client.open_by_key(self.sh.id)
             self.wks = self.sh.sheet1
             self.started = time.time()
-            logger.debug('Client re-authorized, Spreadsheet and Worksheet reloaded')
+            logger.debug(
+                'Client re-authorized, Spreadsheet and Worksheet reloaded')
         else:
-            logger.debug(f'Wont reconnect. Last connection was {round(last_connect/60,1)}'\
-                    f'min ago, LESS than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
+            logger.debug(f'Wont reconnect. Last connection was {round(last_connect/60,1)}'
+                         f'min ago, LESS than {round(CFG.PYGSHEET_RECONNECT_TIME/60, 1)}')
             pass
+
 
 def create_new_sheet(gc: pygsheets.client.Client) -> str:
     """
@@ -149,7 +145,7 @@ def start_gsheets() -> Union[Tuple[List[str],
                                    pygsheets.client.Client,
                                    pygsheets.Spreadsheet,
                                    pygsheets.Worksheet
-                                         ], None]:
+                                   ], None]:
     """
     Function to start work with googlesheets. 
     Establish connection, create new list, create header.

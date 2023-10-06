@@ -1,10 +1,12 @@
 import os
+from dotenv import load_dotenv
 import logging
 from logging.handlers import RotatingFileHandler
 
 from scheduler import get_scheduler
 
 BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+load_dotenv(os.path.join(BOT_FOLDER, '.env'))
 
 
 def startLogger():
