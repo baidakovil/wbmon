@@ -158,7 +158,7 @@ def start_gsheets() -> Union[Tuple[List[str],
     logger.info('Client authorized at start')
 
     lnks = get_links(client)
-    logger.info(f"TEST MODE: {os.getenv('TEST') == 'true'}")
+    logger.info(f"TEST MODE: {os.getenv('TEST') == 'true'},MAX_LINK_QUANTITY: {CFG.MAX_LINK_QUANTITY}")
     if CFG.CREATE_NEW_SPREADSHEET:
         spreadsheet = create_new_sheet(client)
     else:

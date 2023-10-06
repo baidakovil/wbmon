@@ -14,7 +14,6 @@ from scraper import interval_scraper, dum_interval_scraper
 BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
 CFG = Cfg()
 
-
 logger = logging.getLogger('A.GC')
 logger.setLevel(logging.DEBUG)
 
@@ -28,7 +27,7 @@ def get_scheduler():
         **CFG.CRON_ARGS
     )
 
-    kwargs = {'lnks': lnks[:CFG.MAX_LINK_QUANTITY],
+    kwargs = {'lnks': lnks[0:CFG.MAX_LINK_QUANTITY],
               'gc': gc,
               'trigger': trigger}
 

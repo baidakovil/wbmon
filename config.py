@@ -1,18 +1,20 @@
 import os
 import logging
+from dotenv import load_dotenv
 
 logger = logging.getLogger('A.CFG')
 logger.setLevel(logging.DEBUG)
+load_dotenv(os.path.join(BOT_FOLDER, '.env'))
 
 
 class Cfg():
-    def __init__(self, test=(os.getenv('TEST') == 'true')):
+    def __init__(self, test=os.getenv('TEST') == 'true'):
         if test:
             logger.info(f'Cfg Class says: TEST CONFIG LOADING')
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             # # # # # # TEST  # # # CONFIG  # # # # # # # # # # # #
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-            self.OLD_SHEET_TITLE = 'wbmon-log-05-Oct'
+            self.OLD_SHEET_TITLE = 'wbmon-log-06-Oct_rev5'
             self.SPREADSHEET_PREFIX = 'wbmon-log-'
             self.DATA_HEADER = [
                 'Date',
@@ -55,7 +57,7 @@ class Cfg():
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             # # # # # # # WORKING # # # CONFIG  # # # # # # # # # #
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-            self.OLD_SHEET_TITLE = 'wbmon-log-05-Oct_rev1'
+            self.OLD_SHEET_TITLE = 'wbmon-log-06-Oct_rev5'
             self.SPREADSHEET_PREFIX = 'wbmon-log-'
             self.DATA_HEADER = [
                 'Date',
