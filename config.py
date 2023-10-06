@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger('A.CFG')
 logger.setLevel(logging.DEBUG)
+BOT_FOLDER = os.path.dirname(os.path.realpath(__file__))
 load_dotenv(os.path.join(BOT_FOLDER, '.env'))
 
 
