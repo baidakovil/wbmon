@@ -5,15 +5,11 @@ Wildberries marketplace prices monitor with publishing into Google Sheets.
 Sample of deployed and real-time running Google Sheets with results: [spreadsheet].
 
 ## Features
-* Scheduling with `cron trigger`: APScheduler's [doc]
+* Scheduling of parsed intervals with power of `cron scheduler`: see in APScheduler's [doc]
 * Saving fields: `timestamp`, `link`, `brand name`, `goods name`, `seller`, `id`, `customer price`, `seller price`
 * Reading **list of links** from Google Sheet or from file
 * Publishing **parsed results** to Google Sheet and to file
 * Detailed logging: [sample] 
-
-[doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html?highlight=week#apscheduler.triggers.cron.CronTrigger
-[spreadsheet]: https://docs.google.com/spreadsheets/d/1wWehURjMgs6n4GlEl9EEvLRQomgIva5awKEYg2nBnvk/edit?usp=sharing
-[sample]: /docs/logger_example.png
 
 ## Built with
 
@@ -30,14 +26,20 @@ Sample of deployed and real-time running Google Sheets with results: [spreadshee
 **[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables **|** *BSD* 
 
 
+[doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html?highlight=week#apscheduler.triggers.cron.CronTrigger
+[spreadsheet]: https://docs.google.com/spreadsheets/d/1wWehURjMgs6n4GlEl9EEvLRQomgIva5awKEYg2nBnvk/edit?usp=sharing
+[sample]: /docs/logger_example.png
+
+[Wildberries]: https://www.wildberries.ru/
+[Google Sheets]: https://google.com/sheets
+[Google Cloud APIs and services]: https://console.cloud.google.com/apis/
+
 [pygsheets]: https://github.com/nithinmurali/pygsheets
 [python-dotenv]: https://pypi.org/project/python-dotenv/
 [APScheduler]: https://apscheduler.readthedocs.io/en/3.x/userguide.html  
 [Python]: https://www.python.org/
 [selenium]: https://pypi.org/project/selenium/
-[Wildberries]: https://www.wildberries.ru/
-[Google Sheets]: https://google.com/sheets
-[Google Cloud APIs and services]: https://console.cloud.google.com/apis/
+
 
 ## Contributing
 
