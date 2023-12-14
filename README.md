@@ -1,9 +1,24 @@
 # wbmon  
-The app to continuous prices monitoring on Wildberries marketplace  
-  
-## Stage 1   
+[![Pylint](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml)  
+
+Wildberries marketplace prices monitor with publishing into Google Sheets.   
+Sample of deployed and real-time running Google Sheets with results: [link](https://docs.google.com/spreadsheets/d/1xR6I6X6BsF1hWDuTIfhTfEY2hbvuAvaz6jiUnJ9G3g8/edit?usp=sharing).
+
+## Table of contents
+- [Functions](#functions)
+- [Feedback](#feedback)
+- [Built with](#built-with)
+- [Deployment](#deployment-with-docker)
+- [Contributing](#contributing)
+
+## Functions
+* Any possible schedules with APScheduler's CRON scheduler
+* Parsed fields: 
+
+## Built with
 * python script to get price from WB html page with _selenim_  
 * python script to send prices from python to google sheets with _pygsheets_  
+
   
 ## Stage 2  [DONE]
 * six separate scripts:  
@@ -23,13 +38,9 @@ The app to continuous prices monitoring on Wildberries marketplace
 * automated links loading from *links* spreadsheet
 * continuous working as systemd service with senging to goggle sheet
 
-## Stage 3 [PAUSED]
 
-* More parse functions
-* Database storage
-* Function definitions
-* python-typing
+## Contributing
 
-## Stage 4
-
-* Proxy rotating
+Please feel free to open pull requests. If you're planning on implementing
+something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc)
+then please open an issue first.
