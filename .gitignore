@@ -8,5 +8,4 @@ paper
 *.ipynb
 data
 .env
-*.png
 *workspace
