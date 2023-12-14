@@ -18,7 +18,7 @@ import logging
 import os
 import re
 from datetime import datetime
-from typing import Tuple, Union
+from typing import Tuple
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import Chrome
@@ -34,7 +34,7 @@ logger = logging.getLogger('A.SC')
 logger.setLevel(logging.DEBUG)
 
 
-class PageResult(
+class PageResult(  # pylint: disable=too-few-public-methods
     collections.namedtuple(
         typename='pageResult',
         field_names=[name.lower() for name in CFG.DATA_HEADER],
@@ -46,8 +46,6 @@ class PageResult(
     Store for results obtained from parsing.
     """
 
-    pass
-
 
 def wb_parser(driver: Chrome, link: str) -> PageResult:
     """
@@ -56,98 +54,6 @@ def wb_parser(driver: Chrome, link: str) -> PageResult:
         driver: web-driver; Chrome is unarguemented choice
         Link: link to parse
     """
-
-    def wait_driver(driver: Chrome) -> Chrome:
-        """Inner func. Waits until page will be loaded. XPATH changed once."""
-        try:
-            WebDriverWait(driver, CFG.PAGELOAD_MAXTIME).until(
-                EC.visibility_of_element_located(
-                    (By.XPATH, "//*[@class='product-page__aside']")
-                )
-            )
-        except TimeoutException:
-            logger.warning('TimeoutException when waited for main page to load')
-        return driver
-
-    def parse_shop_name(driver: Chrome) -> str:
-        """Inner func. Get seller name. Sometimes it is missed on the page."""
-        try:
-            elem = driver.find_element(
-                By.XPATH, "//*[@class='seller-info__name']"
-            ).get_attribute('textContent')
-        except NoSuchElementException:
-            elem = CFG.ERROR_PARSE_STRING
-        if isinstance(elem, str):
-            return elem.strip()
-        return CFG.ERROR_PARSE_STRING
-
-    def retain_num(elem: WebElement) -> int:
-        """Inner func. Filters all characters except digits."""
-        return int(re.sub(r'[^0-9]', '', elem.text))
-
-    def parse_price(driver: Chrome) -> Tuple[str, str]:
-        """Inner func. Get 'customer' (real) and 'seller' (striked) prices."""
-
-        soldout = 'Нет в наличии'
-
-        try:
-            e12 = driver.find_element(
-                By.XPATH,
-                "//div[contains(@class, 'product-page__price-block product-page__price-block--common')]",
-            ).text
-        except NoSuchElementException:
-            logger.warning('Cannot find neither prices nor soldout')
-            return CFG.ERROR_PARSE_STRING, CFG.ERROR_PARSE_STRING
-
-        if soldout in e12:
-            return soldout, soldout
-
-        try:
-            e1 = driver.find_element(By.XPATH, "//*[@class='price-block__final-price']")
-            e1 = str(retain_num(e1))
-        except NoSuchElementException:
-            logger.warning('Undocumented case e_1: %s', e12)
-            e1 = CFG.ERROR_PARSE_STRING
-
-        try:
-            e2 = driver.find_element(By.XPATH, "//*[@class='price-block__old-price']")
-            e2 = str(retain_num(e2))
-        except NoSuchElementException:
-            logger.warning('No seller price parsed')
-            e2 = CFG.ERROR_PARSE_STRING
-
-        return e1, e2
-
-    def parse_goods_name(driver: Chrome) -> Tuple[str, str]:
-        """Inner func. Get brand name and thing name, that are in same string."""
-        try:
-            elem = driver.find_element(By.XPATH, "//*[@class='product-page__header']")
-        except NoSuchElementException:
-            logger.warning('Can not find brand/good name')
-            return CFG.ERROR_PARSE_STRING, CFG.ERROR_PARSE_STRING
-        try:
-            Brand_Name, Goods_Name = elem.text.split('\n')
-        except ValueError:
-            logger.warning('Find product name, but can not parse it to brand and good')
-            return CFG.ERROR_PARSE_STRING, CFG.ERROR_PARSE_STRING
-        return Brand_Name, Goods_Name
-
-    def parse_id(driver: Chrome) -> str:
-        """Inner func. Get nomenclature ID number of goods."""
-        try:
-            elem = driver.find_elements(
-                By.CSS_SELECTOR, "button.product-article__copy[type='button']"
-            )
-        except NoSuchElementException:
-            logger.warning('Can not find product ID')
-            return CFG.ERROR_PARSE_STRING
-        try:
-            int(elem[1].text)
-        except TypeError:
-            logger.warning('Find product ID, but it is not a numeric')
-            return CFG.ERROR_PARSE_STRING
-        return elem[1].text
-
     driver.get(link)
     driver = wait_driver(driver)
 
@@ -162,12 +68,108 @@ def wb_parser(driver: Chrome, link: str) -> PageResult:
     )
 
 
+def wait_driver(driver: Chrome) -> Chrome:
+    """Inner func. Waits until page will be loaded. XPATH changed once."""
+    try:
+        WebDriverWait(driver, CFG.PAGELOAD_MAXTIME).until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//*[@class='product-page__aside']")
+            )
+        )
+    except TimeoutException:
+        logger.warning('TimeoutException when waited for main page to load')
+    return driver
+
+
+def parse_shop_name(driver: Chrome) -> str:
+    """Inner func. Get seller name. Sometimes it is missed on the page."""
+    try:
+        elem = driver.find_element(
+            By.XPATH, "//*[@class='seller-info__name']"
+        ).get_attribute('textContent')
+    except NoSuchElementException:
+        elem = CFG.ERROR_PARSE_STRING
+    if isinstance(elem, str):
+        return elem.strip()
+    return CFG.ERROR_PARSE_STRING
+
+
+def retain_num(elem: WebElement) -> int:
+    """Inner func. Filters all characters except digits."""
+    return int(re.sub(r'[^0-9]', '', elem.text))
+
+
+def parse_price(driver: Chrome) -> Tuple[str, str]:
+    """Inner func. Get 'customer' (real) and 'seller' (striked) prices."""
+
+    soldout = 'Нет в наличии'
+
+    try:
+        e12 = driver.find_element(
+            By.XPATH,
+            "//div[contains(@class, 'product-page__price-block product-page__price-block--common')]",  #  pylint: disable=line-too-long
+        ).text
+    except NoSuchElementException:
+        logger.warning('Cannot find neither prices nor soldout')
+        return CFG.ERROR_PARSE_STRING, CFG.ERROR_PARSE_STRING
+
+    if soldout in e12:
+        return soldout, soldout
+
+    try:
+        e1 = driver.find_element(By.XPATH, "//*[@class='price-block__final-price']")
+        e1 = str(retain_num(e1))
+    except NoSuchElementException:
+        logger.warning('Undocumented case e_1: %s', e12)
+        e1 = CFG.ERROR_PARSE_STRING
+
+    try:
+        e2 = driver.find_element(By.XPATH, "//*[@class='price-block__old-price']")
+        e2 = str(retain_num(e2))
+    except NoSuchElementException:
+        logger.warning('No seller price parsed')
+        e2 = CFG.ERROR_PARSE_STRING
+
+    return e1, e2
+
+
+def parse_goods_name(driver: Chrome) -> Tuple[str, str]:
+    """Inner func. Get brand name and thing name, that are in same string."""
+    try:
+        elem = driver.find_element(By.XPATH, "//*[@class='product-page__header']")
+    except NoSuchElementException:
+        logger.warning('Can not find brand/good name')
+        return CFG.ERROR_PARSE_STRING, CFG.ERROR_PARSE_STRING
+    try:
+        brand_name, goods_name = elem.text.split('\n')
+    except ValueError:
+        logger.warning('Find product name, but can not parse it to brand and good')
+        return CFG.ERROR_PARSE_STRING, CFG.ERROR_PARSE_STRING
+    return brand_name, goods_name
+
+
+def parse_id(driver: Chrome) -> str:
+    """Inner func. Get nomenclature ID number of goods."""
+    try:
+        elem = driver.find_elements(
+            By.CSS_SELECTOR, "button.product-article__copy[type='button']"
+        )
+    except NoSuchElementException:
+        logger.warning('Can not find product ID')
+        return CFG.ERROR_PARSE_STRING
+    try:
+        int(elem[1].text)
+    except TypeError:
+        logger.warning('Find product ID, but it is not a numeric')
+        return CFG.ERROR_PARSE_STRING
+    return elem[1].text
+
+
 def dummy_parser(dummydriver: int, link: str) -> PageResult:
     """
     Simulate parser for debugging. Returns PageResult class instance.
     """
     date = datetime.now().strftime(CFG.FORMAT_TIMESTAMP_PARSED)
-    link = link
     seller_info = 'My Shop 2Sample'
     goods_name = 'Confety'
     brand_name = 'Brandy'
