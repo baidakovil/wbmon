@@ -42,33 +42,24 @@ class Gc:
     """
 
     def __init__(self) -> None:
+        """
+        (1) Authorize Google Sheets, (2) sets start 'timer', (3) creates or opens file
+        (spreadsheet), (4) opens worksheet "sheet1" in it, (5) creates header if needed
+        """
         self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
-        self.started = time.monotonic()
         logger.debug('Client authorized at start')
+        self.started = time.monotonic()
 
-    def open_by_name(self, spreadsheet: str) -> pygsheets.Spreadsheet:
-        """
-        Connect, i.e. load spreadsheet with given name to the Gc() and returns it.
-        Args:
-            spreadsheet: name of spreadsheet to connect/return
-        Returns:
-            spreadsheet instance, also add .sh property to Gc().
-        """
+        if CFG.CREATE_NEW_SPREADSHEET:
+            spreadsheet = self.create_new_sheet()
+        else:
+            spreadsheet = CFG.OLD_SHEET_TITLE
+            logger.info('Old Spreadsheet will be loaded: %s', CFG.OLD_SHEET_TITLE)
+
         self.sh = self.client.open(spreadsheet)
-        self.started = time.monotonic()
-        return self.sh
-
-    def open_wks(self) -> pygsheets.Worksheet:
-        """
-        Function to open worksheet 'sheet1' in previously opened spreadsheet sh. So with
-        it, current implementation supported only 1 opened spreasheet 1 worksheet (first
-        worksheet!).
-        Returns:
-            worksheet, also add .wks property to Gc()
-        """
         self.wks = self.sh.sheet1
-        self.started = time.monotonic()
-        return self.wks
+        if CFG.CREATE_NEW_SPREADSHEET:
+            create_header(self.wks)
 
     def reconnect(self, soft: bool) -> None:
         """
@@ -79,56 +70,58 @@ class Gc:
         """
         last_connect = time.monotonic() - self.started
         if (soft and (last_connect > CFG.SEC_PYGSHEET_RECONNECT_TIME)) or (not soft):
-            logger.debug(
-                f'Will reconnect. Last connection was {round(last_connect/60,1)}'
-                f'min ago, more than {round(CFG.SEC_PYGSHEET_RECONNECT_TIME/60, 1)}'
+            logger.info(
+                'Will reconnect. Last connection was %s min ago, MORE than %s',
+                round(last_connect / 60, 1),
+                round(CFG.SEC_PYGSHEET_RECONNECT_TIME / 60, 1),
             )
             self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
+            assert self.sh
             self.sh = self.client.open_by_key(self.sh.id)
             self.wks = self.sh.sheet1
             self.started = time.monotonic()
-            logger.debug('Client re-authorized, Spreadsheet and Worksheet reloaded')
+            logger.info('Client re-authorized, Spreadsheet and Worksheet reloaded')
         else:
-            logger.debug(
-                f'Wont reconnect. Last connection was {round(last_connect/60,1)}'
-                f'min ago, LESS than {round(CFG.SEC_PYGSHEET_RECONNECT_TIME/60, 1)}'
+            logger.info(
+                'Wont reconnect. Last connection was %s min ago, LESS than %s',
+                {round(last_connect / 60, 1)},
+                round(CFG.SEC_PYGSHEET_RECONNECT_TIME / 60, 1),
             )
-            pass
 
-
-def create_new_sheet(gc: Client) -> str:
-    """
-    This functions create new spreadsheet with correct name.
-    Args:
-        client: Client pygsheets instance
-    Returns:
-        name of created sheet if ok, Raise exception if cant create
-    """
-    count = 0
-    gsheet_name = CFG.SPREADSHEET_PREFIX + datetime.now().strftime('%d-%b')
-    while count < CFG.MAX_SPREADSHEETS_PERDAY:
-        try:
-            gc.open(gsheet_name)
-        except pygsheets.SpreadsheetNotFound:
-            gc.create(gsheet_name)
-            logger.info(f'Google Spreadsheet created: {gsheet_name}')
-            break
-        count += 1
-        if gsheet_name[-4:-1] != 'rev':
-            gsheet_name = gsheet_name + '_rev' + str(count)
-        else:
-            gsheet_name = gsheet_name[:-1] + str(count)
-        if count == CFG.MAX_SPREADSHEETS_PERDAY:
-            logger.exception(
-                f'Can not create more than {CFG.MAX_SPREADSHEETS_PERDAY} Spreadsheets per day'
-            )
-            raise Exception
-    return gsheet_name
+    def create_new_sheet(self) -> str:
+        """
+        Creates new spreadsheet with correct name.
+        Args:
+            client: Client pygsheets instance
+        Returns:
+            name of created sheet if ok, Raise exception if cant create
+        """
+        count = 0
+        gsheet_name = CFG.SPREADSHEET_PREFIX + datetime.now().strftime('%d-%b')
+        while count < CFG.MAX_SPREADSHEETS_PERDAY:
+            try:
+                self.client.open(gsheet_name)
+            except pygsheets.SpreadsheetNotFound:
+                self.client.create(gsheet_name)
+                logger.info('Google Spreadsheet created: %s', gsheet_name)
+                break
+            count += 1
+            if gsheet_name[-4:-1] != 'rev':
+                gsheet_name = gsheet_name + '_rev' + str(count)
+            else:
+                gsheet_name = gsheet_name[:-1] + str(count)
+            if count == CFG.MAX_SPREADSHEETS_PERDAY:
+                logger.exception(
+                    'Can not create more than %s Spreadsheets per day',
+                    CFG.MAX_SPREADSHEETS_PERDAY,
+                )
+                raise RuntimeError
+        return gsheet_name
 
 
 def get_links(client: Client) -> Optional[List[str]]:
     """
-    Load links from Named range "linksRange" on Sheet1 of special Spreadsheet named
+    Load links from named range LINKS_RANGE_NAME on Sheet1 of special Spreadsheet named
     LINKS_SPREADSHEET_NAME. Raises Exception, should be moderated by admin every launch.
     Args:
         client: Client pygsheets instance
@@ -140,13 +133,17 @@ def get_links(client: Client) -> Optional[List[str]]:
         sh_links = client.open(CFG.LINKS_SPREADSHEET_NAME)
         logger.debug('Links spreadsheet opened: %s', CFG.LINKS_SPREADSHEET_NAME)
     except pygsheets.SpreadsheetNotFound:
-        logger.exception(f'Cant load links from spreadsheet')
-        raise pygsheets.SpreadsheetNotFound
+        logger.warning('Cant load links from spreadsheet! trying links.txt...')
+        try:
+            with open(CFG.LINKS_FILE, encoding='utf-8') as file:
+                links = file.readlines()
+                logger.info('Found %s links in %s', len(links), CFG.LINKS_FILE)
+                return links
+        except FileNotFoundError as exc2:
+            logger.exception('Cant find links. Exit.')
+            raise RuntimeError from exc2
     wks_links = sh_links.sheet1
-    lnkrange = wks_links.get_named_range(name=CFG.LINKS_RANGE_NAME)
-    lnkrange_values = wks_links.get_values(
-        start=lnkrange.start_addr, end=lnkrange.end_addr
-    )
+    lnkrange_values = wks_links.get_values(start=(1, 1), end=(CFG.MAX_LINK_QUANTITY, 1))
     wks_links.unlink()
     logger.debug('Links values downloaded')
     lnks = []
@@ -187,9 +184,9 @@ def create_header(wks: pygsheets.Worksheet) -> bool:
     if mcell.value == CFG.DATA_HEADER[0]:  # I call it "soundcheck".
         logger.debug('Header created and checked')
         return True
-    else:
-        logger.warning('Mistake with header creating')
-        return False
+
+    logger.warning('Mistake with header creating')
+    return False
 
 
 def start_gsheets() -> Tuple[List[str], Gc]:
@@ -211,20 +208,10 @@ def start_gsheets() -> Tuple[List[str], Gc]:
         CFG.MAX_LINK_QUANTITY,
     )
 
-    if CFG.CREATE_NEW_SPREADSHEET:
-        spreadsheet = create_new_sheet(client)
-    else:
-        spreadsheet = CFG.OLD_SHEET_TITLE
-        logger.info(f'Old Spreadsheet will be loaded: {CFG.OLD_SHEET_TITLE}')
-    gc.open_by_name(spreadsheet)
-    wks = gc.open_wks()
-    if CFG.CREATE_NEW_SPREADSHEET:
-        create_header(wks)
-
     return lnks, gc
 
 
-def post_values(gc: Gc, full_result: PageResult) -> bool:
+def post_values(gc: Gc, full_result: List[PageResult]) -> bool:
     """
     Finds actual header position and post all rows below it. Print beautiful logs.
     Args:
@@ -236,10 +223,11 @@ def post_values(gc: Gc, full_result: PageResult) -> bool:
     gc.reconnect(soft=True)
     wks = gc.wks
     logger.debug(' START POSTING')
-    logger.info('|' + ' | '.join(logresult_prepare(header=True)))
+    logger.info('%s', '|' + ' | '.join(logresult_prepare(header=True)))
     start_time = time.time()
-    headRange = wks.get_named_range(name=CFG.HEADER_RANGE_NAME)
-    rn, cn = headRange.start_addr
+    assert wks
+    head_range = wks.get_named_range(name=CFG.HEADER_RANGE_NAME)
+    rn, cn = head_range.start_addr
     post_position = (rn + 1, cn)
     wks.unlink()
     header_vars = [name.lower() for name in CFG.DATA_HEADER]
@@ -254,11 +242,13 @@ def post_values(gc: Gc, full_result: PageResult) -> bool:
             majordim='ROWS',
             parse=None,
         )
-        logger.info(' | '.join(result_list) + ' | ' + CFG.LOGGER_FILTER_MSG)
-        logger.info('|' + ' | '.join(logresult_prepare(data=result_list)))
+        logger.info(  # pylint: disable=logging-not-lazy
+            ' | '.join(result_list) + ' | ' + CFG.LOGGER_FILTER_MSG
+        )
+        logger.info('%s', '|' + ' | '.join(logresult_prepare(data=result_list)))
     wks.link()
     end_time = time.time()
-    logger.debug(' FINISH POSTING' + f' DONE in {round(end_time - start_time,0)} sec')
+    logger.debug(' FINISH POSTING\nDONE in %s sec', round(end_time - start_time, 0))
     return True
 
 
