@@ -27,7 +27,7 @@ Sample of deployed and real-time running Google Sheets with results: [spreadshee
 **[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables **|** *BSD* 
 
 
-[doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html#api
+[doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html#introduction
 [spreadsheet]: https://docs.google.com/spreadsheets/d/1wWehURjMgs6n4GlEl9EEvLRQomgIva5awKEYg2nBnvk/edit?usp=sharing
 [sample]: /docs/logger_example.png
 
