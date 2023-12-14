@@ -16,7 +16,7 @@ Sample of deployed and real-time running Google Sheets with results: [spreadshee
 #### Online-services
 **[Wildberries]** - Online-marketplace, one of three leading in CIS  
 **[Google Sheets]** - Spreadsheet application offered by Google  
-**[Google Cloud APIs and services]** - you'll need create *project* in it, as an interface between **pygsheets** and **Google Sheets** 
+**[Google Cloud APIs and services]** - you'll need create *project* in it to connect **pygsheets** and **Google Sheets** 
 
 #### Software
 **[Python]** - Language to work quickly and integrate systems more effectively **|** *GPL compatible*  
