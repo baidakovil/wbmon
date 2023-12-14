@@ -48,7 +48,7 @@ def interval_scraper(lnks: List[str]) -> List[PageResult]:
     driver = webdriver.Chrome(options=options)
 
     full_result = []
-    for i in range(0, len(lnks)):
+    for i, link in enumerate(lnks):
         interparse_sleep = random.randint(
             CFG.SCRAPER_INTERPARSE_MIN, CFG.SCRAPER_INTERPARSE_MAX
         )
@@ -60,9 +60,11 @@ def interval_scraper(lnks: List[str]) -> List[PageResult]:
         ##########################
         # LINE BELOW RUNS PARSER #
         ##########################
-        full_result.append(wb_parser(driver=driver, link=lnks[i]))
+        full_result.append(wb_parser(driver=driver, link=link))
         end_time = time.time()
-        logger.debug('-' * 20 + f' PARSED in {round(end_time - start_time,0)} sec')
+        logger.debug(  #  pylint: disable=logging-not-lazy
+            '-' * 20 + ' PARSED in %s sec', round(end_time - start_time, 0)
+        )
     beforequit_sleep = random.randint(
         CFG.SCRAPER_BEFOREQUIT_MIN, CFG.SCRAPER_BEFOREQUIT_MAX
     )
@@ -83,11 +85,13 @@ def dum_interval_scraper(lnks: List[str]) -> List[PageResult]:
     logger.info('Dummy interval scraper started. Have %s links', len(lnks))
     logger.debug('-' * 20)
     full_result = []
-    for i in range(len(lnks)):
+    for i, link in enumerate(lnks):
         logger.info('Scrape link №%s of %s', i + 1, len(lnks))
         start_time = time.time()
-        full_result.append(dummy_parser(i, lnks[i]))
+        full_result.append(dummy_parser(i, link))
         time.sleep(CFG.SEC_WAIT_DUMMYSCRAPER)
         end_time = time.time()
-        logger.debug('-' * 20 + ' DONE in %s sec', round(end_time - start_time, 0))
+        logger.debug(  #  pylint: disable=logging-not-lazy
+            '-' * 20 + ' DONE in %s sec', round(end_time - start_time, 0)
+        )
     return full_result

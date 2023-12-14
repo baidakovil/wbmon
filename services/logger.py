@@ -27,25 +27,20 @@ def start_logger() -> logging.Logger:
     Returns logging.Logger from nothing. Loggers definition. Logger in logger.py is the
     highest (A), other are descendants: A.ma, A.gc, etc.
     """
-    logger = logging.getLogger('A')
-    logger.setLevel(logging.DEBUG)
+    lgr = logging.getLogger('A')
+    lgr.setLevel(logging.DEBUG)
 
-    class ContextFilter(logging.Filter):
+    class ContextFilter(logging.Filter):  # pylint: disable=too-few-public-methods
         """
         Necessary for escaping messages in console with large data (URLs, ...), but log
         it in rotating handler.
         """
 
         def filter(self, record):
-            if CFG.LOGGER_FILTER_MSG in record.msg:
-                return 0
-            else:
-                return 1
+            return 0 if CFG.LOGGER_FILTER_MSG in record.msg else 1
 
     #  Logging to console.
     ch = logging.StreamHandler()
-    #  Logging to file since last run (debugging case).
-    fh = logging.FileHandler(filename=os.path.join('logger.log'), mode='w')
     #  Logging to file, continuous after bot restart.
     rh = RotatingFileHandler(
         filename=os.path.join(CFG.PATH_LOGGER, CFG.FILE_ROTATING_LOGGER),
@@ -58,18 +53,19 @@ def start_logger() -> logging.Logger:
         '%H:%M:%S',
     )
     fh_formatter = logging.Formatter(
-        '[%(asctime)s.%(msecs)03d - %(name)20s - %(filename)20s:%(lineno)4s - %(funcName)20s() - %(levelname)8s - %(threadName)10s] %(message)s',
+        '[%(asctime)s.%(msecs)03d - %(name)20s - %(filename)20s:%(lineno)4s \
+- %(funcName)20s() - %(levelname)8s - %(threadName)10s] %(message)s',
         '%Y-%m-%d %H:%M:%S',
     )
     ch.setLevel(logging.DEBUG)
     rh.setLevel(logging.DEBUG)
     ch.setFormatter(ch_formatter)
     rh.setFormatter(fh_formatter)
-    logger.addHandler(ch)
-    logger.addHandler(rh)
+    lgr.addHandler(ch)
+    lgr.addHandler(rh)
     ch_filter = ContextFilter()
     ch.addFilter(ch_filter)
-    return logger
+    return lgr
 
 
 logger = start_logger()
