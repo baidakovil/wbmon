@@ -46,6 +46,7 @@ class Gc:
         (1) Authorize Google Sheets, (2) sets start 'timer', (3) creates or opens file
         (spreadsheet), (4) opens worksheet "sheet1" in it, (5) creates header if needed
         """
+        logger.debug('Gonna authorize pygsheets')
         self.client = pygsheets.authorize(client_secret=CFG.OAUTH_CREDENTIALS_FILE)
         logger.debug('Client authorized at start')
         self.started = time.monotonic()
