@@ -137,12 +137,12 @@ class Cfg:
 
             #  Cron scheduler arguments. 'minute':'*/3' mean load every 3 min
             self.CRON_ARGS = {
-                'minute': '*/10',
+                'minute': '*/2',
                 'jitter': 10,
             }
 
             #  Whether create new spreadsheet at start or use former
-            self.CREATE_NEW_SPREADSHEET = False
+            self.CREATE_NEW_SPREADSHEET = True
 
             #  Maximum timeout in seconds to wait for page to load
             self.PAGELOAD_MAXTIME = 120
@@ -188,5 +188,5 @@ class Cfg:
             self.ASAP = True
             self.ASAPTRIGGER = 30
             self.ASAPDELAY = 5
-            self.MAX_LINK_QUANTITY = 2
+            self.MAX_LINK_QUANTITY = 200
             self.MISFIRE_TIME = 3600
