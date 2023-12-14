@@ -38,10 +38,6 @@ class Cfg:
     """
 
     def __init__(self, test=os.getenv('TEST') == 'true'):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # # # # # #  COMMON   # # #  SETTINGS   # # # # # # # #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
         # GOOGLE SHEETS
 
         #  Spreadsheet name to publish in case of CREATE_NEW_SPREADSHEET = False
@@ -61,6 +57,9 @@ class Cfg:
             'Cus_RUB',
             'Sel_RUB',
         ]
+
+        #  Name of the named range in new spreadsheets with published parsed valued
+        self.HEADER_RANGE_NAME = 'headerRange'
 
         #  Position of header. Right under it program will publish data
         self.HEADER_LEFT_CORNER = (1, 1)
