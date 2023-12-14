@@ -25,6 +25,7 @@ from tzlocal import get_localzone
 
 from config import Cfg
 from parsing.scraper import interval_scraper
+from services.filesaver import save_values
 from services.gconnect import Gc, post_values, start_gsheets
 
 CFG = Cfg(test=os.getenv('TEST') == 'true')
@@ -70,10 +71,16 @@ def interval_job(lnks: List[str], gc: Gc, trigger: CronTrigger) -> None:
         trigger: Active apscheduler trigger to write info about next run
     """
     start_time = time.time()
-    logger.info('=' * 20 + ' JOBSTARTED')
-    post_values(gc=gc, full_result=interval_scraper(lnks))
+    logger.info('=' * 20 + ' JOBSTARTED')  #  pylint: disable=logging-not-lazy
+    full_result = interval_scraper(lnks)
+    if CFG.SAVE_TO_GSHEETS:
+        post_values(gc=gc, full_result=full_result)
+    if CFG.SAVE_TO_FILE:
+        save_values(full_result=full_result)
     end_time = time.time()
-    logger.info('=' * 20 + ' JOBDONE in %s sec', round(end_time - start_time, 0))
+    logger.info(  #  pylint: disable=logging-not-lazy
+        '=' * 20 + ' JOBDONE in %s sec', round(end_time - start_time, 0)
+    )
     calc_delay(trigger)
 
 
