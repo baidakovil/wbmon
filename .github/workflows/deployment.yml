@@ -2,8 +2,10 @@ name: Deployment
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "stable" ]
+  workflow_run:
+    workflows: ["Pylint"]
+    types:
+      - completed
     
 jobs:
   deploy:
