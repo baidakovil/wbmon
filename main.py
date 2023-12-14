@@ -18,7 +18,6 @@ import logging
 from dotenv import load_dotenv
 
 from parsing.scheduler import get_scheduler
-from services.logger import logger
 
 load_dotenv('.env')
 

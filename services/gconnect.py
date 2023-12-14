@@ -83,8 +83,8 @@ class Gc:
             logger.info('Client re-authorized, Spreadsheet and Worksheet reloaded')
         else:
             logger.info(
-                'Wont reconnect. Last connection was %s min ago, LESS than %s',
-                {round(last_connect / 60, 1)},
+                'Will not reconnect. Last connection was %s min ago, LESS than %s',
+                round(last_connect / 60, 1),
                 round(CFG.SEC_PYGSHEET_RECONNECT_TIME / 60, 1),
             )
 
@@ -222,7 +222,7 @@ def post_values(gc: Gc, full_result: List[PageResult]) -> bool:
     """
     gc.reconnect(soft=True)
     wks = gc.wks
-    logger.debug(' START POSTING')
+    logger.debug(' START POSTING\n')
     logger.info('%s', '|' + ' | '.join(logresult_prepare(header=True)))
     start_time = time.time()
     assert wks
@@ -248,7 +248,7 @@ def post_values(gc: Gc, full_result: List[PageResult]) -> bool:
         logger.info('%s', '|' + ' | '.join(logresult_prepare(data=result_list)))
     wks.link()
     end_time = time.time()
-    logger.debug(' FINISH POSTING\nDONE in %s sec', round(end_time - start_time, 0))
+    logger.debug(' FINISH POSTING. DONE in %s sec \n', round(end_time - start_time, 0))
     return True
 
 

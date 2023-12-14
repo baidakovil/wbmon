@@ -124,6 +124,11 @@ class Cfg:
         #  Quantity of files, keeping by rotating logger.
         self.QTY_BACKUPS_ROTATING_LOGGER = 5
 
+        # PARSER
+
+        #  Arguments to pass to Chrome driver. Better not to touch
+        self.CHROME_DRIVER_ARGS = ['--headless', '--no-sandbox']
+
         if test:
             logger.info('Cfg Class says: TEST CONFIG LOADING')
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -165,9 +170,6 @@ class Cfg:
             #  Parameter misfire_grace_time for scheduler, time to delete overdue jobs
             self.MISFIRE_TIME = 30
 
-            #  Arguments to pass to Chrome driver. Better not to touch
-            self.CHROME_DRIVER_ARGS = ['--headless', '--no-sandbox']
-
         else:
             logger.info('Cfg Class says: WORKING CONFIG LOADING')
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -184,8 +186,7 @@ class Cfg:
             self.SCRAPER_BEFOREQUIT_MAX = 20
             self.SCRAPER_BEFOREQUIT_MIN = 10
             self.ASAP = True
-            self.ASAPTRIGGER = 60
+            self.ASAPTRIGGER = 30
             self.ASAPDELAY = 5
-            self.MAX_LINK_QUANTITY = 100
+            self.MAX_LINK_QUANTITY = 2
             self.MISFIRE_TIME = 3600
-            self.CHROME_DRIVER_ARGS = ['--headless', '--no-sandbox']

@@ -1,0 +1,15 @@
+[Unit]
+Description=Wildberries price parser
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=<path-to-your-virtual-environment>/bin/python main.py
+ExecReload=<path-to-your-virtual-environment>/bin/python main.py
+WorkingDirectory=<path-to-app-folder-with-main.py>
+KillMode=process
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
