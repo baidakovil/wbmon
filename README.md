@@ -1,5 +1,5 @@
 # wbmon  
-[![Pylint](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml)  
+[![Pylint](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml)  [![Deployment](https://github.com/baidakovil/wbmon/actions/workflows/deployment.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/deployment.yml)
 
 Wildberries marketplace prices monitor with publishing into Google Sheets.   
 Sample of deployed and real-time running Google Sheets with results: [link](https://docs.google.com/spreadsheets/d/1xR6I6X6BsF1hWDuTIfhTfEY2hbvuAvaz6jiUnJ9G3g8/edit?usp=sharing).
