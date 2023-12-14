@@ -2,42 +2,42 @@
 [![Pylint](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml)  [![Deployment](https://github.com/baidakovil/wbmon/actions/workflows/deployment.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/deployment.yml)
 
 Wildberries marketplace prices monitor with publishing into Google Sheets.   
-Sample of deployed and real-time running Google Sheets with results: [link](https://docs.google.com/spreadsheets/d/1xR6I6X6BsF1hWDuTIfhTfEY2hbvuAvaz6jiUnJ9G3g8/edit?usp=sharing).
+Sample of deployed and real-time running Google Sheets with results: [spreadsheet].
 
-## Table of contents
-- [Functions](#functions)
-- [Feedback](#feedback)
-- [Built with](#built-with)
-- [Deployment](#deployment-with-docker)
-- [Contributing](#contributing)
+## Features
+* Scheduling with `cron trigger`: APScheduler's [doc]
+* Saving fields: `timestamp`, `link`, `brand name`, `goods name`, `seller`, `id`, `customer price`, `seller price`
+* Reading **list of links** from Google Sheet or from file
+* Publishing **parsed results** to Google Sheet and to file
+* Detailed logging: [sample] 
 
-## Functions
-* Any possible schedules with APScheduler's CRON scheduler
-* Parsed fields: 
+[doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html?highlight=week#apscheduler.triggers.cron.CronTrigger
+[spreadsheet]: https://docs.google.com/spreadsheets/d/1wWehURjMgs6n4GlEl9EEvLRQomgIva5awKEYg2nBnvk/edit?usp=sharing
+[sample]: /docs/logger_example.png
 
 ## Built with
-* python script to get price from WB html page with _selenim_  
-* python script to send prices from python to google sheets with _pygsheets_  
 
-  
-## Stage 2  [DONE]
-* six separate scripts:  
-    - **main.py**   
-    scheduler runner, main logger  
-    - **config.py**  
-    test/working sets of configs, lead by _dotenv-python_  
-    - **gconnect.py**  
-    _Gc_ class for automatic reconnection and worksheet  
-    - **scheduler.py**  
-    with _APSCheduler_  
-    - **scraper.py**  
-    pretty simple loop 
-    - **wbparser.py**  
-    _PageResult_ class for results storage, parse functions  
-      
-* automated links loading from *links* spreadsheet
-* continuous working as systemd service with senging to goggle sheet
+#### Online-services
+**[Wildberries]** - Online-marketplace, one of three leading in CIS  
+**[Google Sheets]** - Spreadsheet application offered by Google  
+**[Google Cloud APIs and services]** - you'll need create *project* in it, as an interface between **pygsheets** and **Google Sheets** 
 
+#### Software
+**[Python]** - Language to work quickly and integrate systems more effectively **|** *GPL compatible*  
+**[APScheduler]** - Advanced Python scheduler coming with python-telegram-bot **|** *MIT*  
+**[selenium]**  python script to get price from WB html page with **|** *Apache 2*  
+**[pygsheets]** - library to access google spreadsheets through the Google Sheets API v4 **|** *MIT*  
+**[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables **|** *BSD* 
+
+
+[pygsheets]: https://github.com/nithinmurali/pygsheets
+[python-dotenv]: https://pypi.org/project/python-dotenv/
+[APScheduler]: https://apscheduler.readthedocs.io/en/3.x/userguide.html  
+[Python]: https://www.python.org/
+[selenium]: https://pypi.org/project/selenium/
+[Wildberries]: https://www.wildberries.ru/
+[Google Sheets]: https://google.com/sheets
+[Google Cloud APIs and services]: https://console.cloud.google.com/apis/
 
 ## Contributing
 
