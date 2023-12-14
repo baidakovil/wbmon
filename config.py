@@ -22,11 +22,16 @@ logger = logging.getLogger('A.CFG')
 logger.setLevel(logging.DEBUG)
 load_dotenv('.env')
 
+#  pylint: disable=invalid-name
+#  pylint: disable=too-many-instance-attributes
+#  pylint: disable=too-few-public-methods
+#  pylint: disable=too-many-statements
+
 
 class Cfg:
     """
-    Class for simple obtaining configs.
-    Test/Working settings are SPLITTED and DUPLICATED, it is like experiment.
+    Class for storing config parameters.
+    Note: Test/Working settings are SPLITTED and DUPLICATED, it is like experiment.
     In the beginning of __init__() there is common settings for testing and working.
     After, settings loaded on base of ENVIRONMENT VARIABLE 'TEST'. It should be exactly
     'true' to load test settings and any other for working.
@@ -36,7 +41,7 @@ class Cfg:
         # GOOGLE SHEETS
 
         #  Spreadsheet name to publish in case of CREATE_NEW_SPREADSHEET = False
-        self.OLD_SHEET_TITLE = 'wbmon-log-13-Dec'
+        self.OLD_SHEET_TITLE = 'wbmon-log-14-Dec'
 
         #  Spreadsheet prefix for new creating spreadsheet
         self.SPREADSHEET_PREFIX = 'wbmon-log-'
@@ -60,9 +65,12 @@ class Cfg:
         self.HEADER_LEFT_CORNER = (1, 1)
 
         #  Name of named range in LINKS_SPREADSHEET_NAME
-        self.LINKS_RANGE_NAME = 'linksRange'
+        self.LINKS_FILE = 'links.txt'
 
-        #  Name of the file where links to load are stored
+        #  If true, will publish results to google sheets
+        self.SAVE_TO_GSHEETS = True
+
+        #  Name of the google spreadshee where links to load are stored
         self.LINKS_SPREADSHEET_NAME = 'links'
 
         #  Name of the google credentials file
@@ -73,6 +81,17 @@ class Cfg:
 
         #  Maximum possible autocreated spreadsheets quantity in single day
         self.MAX_SPREADSHEETS_PERDAY = 27
+
+        # STORING TO CSV
+
+        #  If true, will save results to file
+        self.SAVE_TO_FILE = True
+
+        #  Filename when SAVE_TO_FILE = True
+        self.STORING_CSV_FILENAME = 'wbmon_results.csv'
+
+        # Fields separator in csv:
+        self.STORING_CSV_SEPARATOR = ';'
 
         # USER INTERFACE
 
@@ -89,7 +108,7 @@ class Cfg:
         self.LOGGER_FILTER_MSG = 'LOGGER_FILTER_MSG'
 
         #  Time between loads in dummyscraper
-        self.SEC_WAIT_DUMMYSCRAPER = 2
+        self.SEC_WAIT_DUMMYSCRAPER = 5
 
         # LOGGER
 
@@ -106,14 +125,14 @@ class Cfg:
         self.QTY_BACKUPS_ROTATING_LOGGER = 5
 
         if test:
-            logger.info(f'Cfg Class says: TEST CONFIG LOADING')
+            logger.info('Cfg Class says: TEST CONFIG LOADING')
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             # # # # # # TEST  # # # CONFIG  # # # # # # # # # # # #
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
             #  Cron scheduler arguments. 'minute':'*/3' mean load every 3 min
             self.CRON_ARGS = {
-                'minute': '*/3',
+                'minute': '*/10',
                 'jitter': 10,
             }
 
@@ -124,21 +143,21 @@ class Cfg:
             self.PAGELOAD_MAXTIME = 120
 
             #  Min and max intervals between parsing, real will be random
-            self.SCRAPER_INTERPARSE_MAX = 10
-            self.SCRAPER_INTERPARSE_MIN = 5
+            self.SCRAPER_INTERPARSE_MAX = 5
+            self.SCRAPER_INTERPARSE_MIN = 1
 
             #  Min and max intervals befor close driver, real will be random
-            self.SCRAPER_BEFOREQUIT_MAX = 10
-            self.SCRAPER_BEFOREQUIT_MIN = 5
+            self.SCRAPER_BEFOREQUIT_MAX = 5
+            self.SCRAPER_BEFOREQUIT_MIN = 1
 
             #  Does program should load links as soon as possible
             self.ASAP = True
 
             #  If next job close than this (in seconds), than program will wait for it
-            self.ASAPTRIGGER = 30
+            self.ASAPTRIGGER = 5
 
             #  Delay before start to load ASAP
-            self.ASAPDELAY = 2
+            self.ASAPDELAY = 1
 
             #  How many links maximum will be managed
             self.MAX_LINK_QUANTITY = 2
@@ -150,7 +169,7 @@ class Cfg:
             self.CHROME_DRIVER_ARGS = ['--headless', '--no-sandbox']
 
         else:
-            logger.info(f'Cfg Class says: WORKING CONFIG LOADING')
+            logger.info('Cfg Class says: WORKING CONFIG LOADING')
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             # # # # # # # WORKING # # # CONFIG  # # # # # # # # # #
             # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -158,7 +177,7 @@ class Cfg:
                 'hour': '*/8',
                 'jitter': 1800,
             }
-            self.CREATE_NEW_SPREADSHEET = True
+            self.CREATE_NEW_SPREADSHEET = False
             self.PAGELOAD_MAXTIME = 300
             self.SCRAPER_INTERPARSE_MAX = 120
             self.SCRAPER_INTERPARSE_MIN = 30
