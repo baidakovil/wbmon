@@ -33,12 +33,13 @@ def save_values(full_result: List[PageResult]) -> None:
     """
     header_vars = [name.lower() for name in CFG.DATA_HEADER]
     try:
-        open(CFG.STORING_CSV_FILENAME)
+        with open(CFG.STORING_CSV_FILENAME, encoding='utf-8'):
+            pass
     except FileNotFoundError:
-        with open(CFG.STORING_CSV_FILENAME, 'a') as file:
+        with open(CFG.STORING_CSV_FILENAME, 'a', encoding='utf-8') as file:
             file.write(CFG.STORING_CSV_SEPARATOR.join(header_vars))
             file.write('\n')
-    with open(CFG.STORING_CSV_FILENAME, 'a') as file:
+    with open(CFG.STORING_CSV_FILENAME, 'a', encoding='utf-8') as file:
         for result in full_result:
             result_list = [str(result._asdict()[name]) for name in header_vars]
             result_list.append('\n')
