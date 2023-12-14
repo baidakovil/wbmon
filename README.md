@@ -102,7 +102,7 @@ Before running app these bare steps required:
     ```
 * Open link in browser, authorize your Google account, copy code and paste it to console. You'll see `sheets.googleapis.com-python.json` file in project folder. This step should be passed once for given `client_secret.json` file.
 
-    *Notice*: with *Publishing status* set to *Testing*, token will expire after 7 days. Unfortunately, I can't manage authorization after setting *Publishing status* to *Production*, though this documented to be OK. Hope you'll be more lucky, if you need more than 7 days of continuous work.
+    *Notice*: with *Publishing status* set to *Testing*, token will expire after 7 days. Unfortunately, I could not manage authorization after setting *Publishing status* to *Production*, though this documented to be OK. Hope you'll be more lucky, if you need more than 7 days of continuous work.
 
 
 [Test users]: /docs/test_users.png
@@ -113,7 +113,7 @@ Before running app these bare steps required:
 
 ## How to deploy 24/7
 
-There is nothing special about the deployment of this application compared to other python applications. I do it with **systemd**, in the way as described in [manual deployment] section of my favourit Green Grass Bot project. For this type of deployment I have attach sample file `scripts/wbmon.service-example` and `deployment.yml` workflow in `.github` folder. It works well.
+There is nothing special about the deployment of this application compared to other python applications. I do it with **systemd**, in the way as described in [manual deployment] section of my favourite Green Grass Bot project. For this type of deployment I have attach sample file `scripts/wbmon.service-example` and `deployment.yml` workflow in `.github` folder. It works well.
 
 [manual deployment]: https://github.com/baidakovil/GreenGrassBot#manual-deployment
 
@@ -128,7 +128,7 @@ Notice, there are 3 sections in `config.py`:
 - *WORKING CONFIG* — setting values for *working* mode 
 
 #### Ask questions
-If you stuck, please feel free to contact me
+If you stuck with things, please feel free to contact me
 
 ## Contributing
 
