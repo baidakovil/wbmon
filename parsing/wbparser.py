@@ -162,6 +162,9 @@ def parse_id(driver: Chrome) -> str:
     except TypeError:
         logger.warning('Find product ID, but it is not a numeric')
         return CFG.ERROR_PARSE_STRING
+    except IndexError:
+        logger.warning('Find product ID, but it is not iterates properly')
+        return CFG.ERROR_PARSE_STRING
     return elem[1].text
 
 
