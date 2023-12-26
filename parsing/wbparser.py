@@ -69,7 +69,7 @@ def wb_parser(driver: Chrome, link: str) -> PageResult:
 
 
 def wait_driver(driver: Chrome) -> Chrome:
-    """Inner func. Waits until page will be loaded. XPATH changed once."""
+    """Waits until page will be loaded. XPATH changed once."""
     try:
         WebDriverWait(driver, CFG.PAGELOAD_MAXTIME).until(
             EC.visibility_of_element_located(
@@ -82,7 +82,7 @@ def wait_driver(driver: Chrome) -> Chrome:
 
 
 def parse_shop_name(driver: Chrome) -> str:
-    """Inner func. Get seller name. Sometimes it is missed on the page."""
+    """Get seller name. Sometimes it is missed on the page."""
     try:
         elem = driver.find_element(
             By.XPATH, "//*[@class='seller-info__name']"
@@ -95,12 +95,12 @@ def parse_shop_name(driver: Chrome) -> str:
 
 
 def retain_num(elem: WebElement) -> int:
-    """Inner func. Filters all characters except digits."""
+    """Filters all characters except digits."""
     return int(re.sub(r'[^0-9]', '', elem.text))
 
 
 def parse_price(driver: Chrome) -> Tuple[str, str]:
-    """Inner func. Get 'customer' (real) and 'seller' (striked) prices."""
+    """Get 'customer' (real) and 'seller' (striked) prices."""
 
     soldout = 'Нет в наличии'
 
@@ -134,7 +134,7 @@ def parse_price(driver: Chrome) -> Tuple[str, str]:
 
 
 def parse_goods_name(driver: Chrome) -> Tuple[str, str]:
-    """Inner func. Get brand name and thing name, that are in same string."""
+    """Get brand name and thing name, that are in same string."""
     try:
         elem = driver.find_element(By.XPATH, "//*[@class='product-page__header']")
     except NoSuchElementException:
@@ -149,23 +149,24 @@ def parse_goods_name(driver: Chrome) -> Tuple[str, str]:
 
 
 def parse_id(driver: Chrome) -> str:
-    """Inner func. Get nomenclature ID number of goods."""
+    """Get nomenclature ID number of goods."""
     try:
-        elem = driver.find_elements(
-            By.CSS_SELECTOR, "button.product-article__copy[type='button']"
-        )
+        elem = driver.find_element(
+            By.XPATH, "//*[@class='product-params__cell product-params__cell--copy']"
+        ).get_attribute('textContent')
     except NoSuchElementException:
         logger.warning('Can not find product ID')
         return CFG.ERROR_PARSE_STRING
     try:
-        int(elem[1].text)
+        assert isinstance(elem, str)
+        int(elem)
     except TypeError:
         logger.warning('Find product ID, but it is not a numeric')
         return CFG.ERROR_PARSE_STRING
     except IndexError:
         logger.warning('Find product ID, but it is not iterates properly')
         return CFG.ERROR_PARSE_STRING
-    return elem[1].text
+    return elem
 
 
 def dummy_parser(dummydriver: int, link: str) -> PageResult:
