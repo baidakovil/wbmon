@@ -2,7 +2,9 @@
 [![Pylint](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/pylint.yml)  [![Deployment](https://github.com/baidakovil/wbmon/actions/workflows/deployment.yml/badge.svg)](https://github.com/baidakovil/wbmon/actions/workflows/deployment.yml)
 
 Wildberries marketplace prices monitor with publishing into Google Sheets.   
-Sample of deployed and real-time running Google Sheets with results: [spreadsheet].
+Sample of deployed and real-time running Google Sheets with results is below. Or see this [spreadsheet] itself. 
+
+<img src="./docs/chart.png" width=70%></img>
 
 ## Features
 * Scheduling of parsed intervals with power of `cron scheduler`: see in APScheduler's [doc]
@@ -15,16 +17,16 @@ Sample of deployed and real-time running Google Sheets with results: [spreadshee
 ## Built with
 
 #### Online-services
-**[Wildberries]** - Online-marketplace, one of three leading in CIS  
-**[Google Sheets]** - Spreadsheet application offered by Google  
-**[Google Cloud APIs and services]** - you'll need create *project* in it to connect **pygsheets** and **Google Sheets** 
+**[Wildberries]** - Online-marketplace, one of three leading in CIS, since 2004**|** *No API used*   
+**[Google Sheets]** - Spreadsheet application offered by Google, since 2006 **|** *proprietary*  
+**[Google Cloud APIs and services]** - you'll need create *project* in it to connect **pygsheets** and **Google Sheets**. Since 2018 **|** *proprietary*  
 
 #### Software
-**[Python]** - Language to work quickly and integrate systems more effectively **|** *GPL compatible*  
-**[APScheduler]** - Advanced Python scheduler coming with python-telegram-bot **|** *MIT*  
-**[selenium]**  python script to get price from WB html page with **|** *Apache 2*  
-**[pygsheets]** - library to access google spreadsheets through the Google Sheets API v4 **|** *MIT*  
-**[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables **|** *BSD* 
+**[Python]** - Language to work quickly and integrate systems more effectively, since 1991 **|** *GPL compatible*  
+**[APScheduler]** - Advanced Python scheduler coming with python-telegram-bot, since 2009 **|** *MIT*  
+**[selenium]**  python script to get price from WB html page with, since 2008 **|** *Apache 2*  
+**[pygsheets]** - library to access google spreadsheets through the Google Sheets API v4, since 2016 **|** *MIT*  
+**[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables, since 2014 **|** *BSD* 
 
 
 [doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html#introduction
@@ -35,11 +37,11 @@ Sample of deployed and real-time running Google Sheets with results: [spreadshee
 [Google Sheets]: https://google.com/sheets
 [Google Cloud APIs and services]: https://console.cloud.google.com/apis/
 
-[pygsheets]: https://github.com/nithinmurali/pygsheets
+[pygsheets]: https://pygsheets.readthedocs.io/en/stable/
 [python-dotenv]: https://pypi.org/project/python-dotenv/
-[APScheduler]: https://apscheduler.readthedocs.io/en/3.x/userguide.html  
+[APScheduler]: https://apscheduler.readthedocs.io/
 [Python]: https://www.python.org/
-[selenium]: https://pypi.org/project/selenium/
+[selenium]: https://selenium-python.readthedocs.io/
 
 ## How to run
 
