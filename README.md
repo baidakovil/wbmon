@@ -11,7 +11,7 @@ Sample of deployed and real-time running Google Sheets with results is below. Or
 - [Features](#features)
 - [Built with](#built-with)
 - [How to run](#how-to-run)
-- [How to deploy 24/7](#How-to-deploy-24/7)
+- [How to deploy 24/7](#how-to-deploy-247)
 - [Contributing](#contributing)
 
 # Features
