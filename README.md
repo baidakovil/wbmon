@@ -6,7 +6,15 @@ Sample of deployed and real-time running Google Sheets with results is below. Or
 
 <img src="./docs/chart.png" width=70%></img>
 
-## Features
+
+## Table of contents
+- [Features](#features)
+- [Built with](#built-with)
+- [How to run](#how-to-run)
+- [How to deploy 24/7](#How-to-deploy-24/7)
+- [Contributing](#contributing)
+
+# Features
 * Scheduling of parsed intervals with power of `cron scheduler`: see in APScheduler's [doc]
 * Saving fields: `timestamp`, `link`, `brand name`, `goods name`, `seller`, `id`, `customer price`, `seller price`
 * Reading **list of links** from Google Sheet or from file
@@ -14,7 +22,7 @@ Sample of deployed and real-time running Google Sheets with results is below. Or
 * Detailed logging: [sample] 
 * Up-to-date parsing conditions 👍
 
-## Built with
+# Built with
 
 #### Online-services
 **[Wildberries]** - Online-marketplace, one of three leading in CIS, since 2004**|** *No API used*   
@@ -26,7 +34,7 @@ Sample of deployed and real-time running Google Sheets with results is below. Or
 **[APScheduler]** - Advanced Python scheduler coming with python-telegram-bot, since 2009 **|** *MIT*  
 **[selenium]**  python script to get price from WB html page with, since 2008 **|** *Apache 2*  
 **[pygsheets]** - library to access google spreadsheets through the Google Sheets API v4, since 2016 **|** *MIT*  
-**[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables, since 2014 **|** *BSD* 
+**[python-dotenv]** - Read key-value pairs from a .env file and set them as envir-t variables, since 2014 **|** *BSD*  
 
 
 [doc]: https://apscheduler.readthedocs.io/en/stable/modules/triggers/cron.html#introduction
@@ -43,7 +51,7 @@ Sample of deployed and real-time running Google Sheets with results is below. Or
 [Python]: https://www.python.org/
 [selenium]: https://selenium-python.readthedocs.io/
 
-## How to run
+# How to run
 
 Before running app these bare steps required:
 1. Create project in Google Cloud Console to authorize pygsheets. Google account is required
@@ -113,13 +121,13 @@ Before running app these bare steps required:
 [links file]: https://docs.google.com/spreadsheets/d/1iRMm0IiBFxok6jCC_2m1EVyhHbNR_tRsm9La17UOEu4/
 
 
-## How to deploy 24/7
+# How to deploy 24/7
 
 There is nothing special about the deployment of this application compared to other python applications. I do it with **systemd**, in the way as described in [manual deployment] section of my favourite Green Grass Bot project. For this type of deployment I have attach sample file `scripts/wbmon.service-example` and `deployment.yml` workflow in `.github` folder. It works well.
 
 [manual deployment]: https://github.com/baidakovil/GreenGrassBot#manual-deployment
 
-## What matters
+## What matters when deploying
 
 #### Look at config
 Many things are defined by settings in the `config.py` file. It is well-documented, so read it all. 
@@ -132,7 +140,7 @@ Notice, there are 3 sections in `config.py`:
 #### Ask questions
 If you stuck with things, please feel free to contact me
 
-## Contributing
+# Contributing
 
 Please feel free to open pull requests. If you're planning on implementing
 something big (i.e. not fixing a typo, a small bug fix, minor refactor, etc)
